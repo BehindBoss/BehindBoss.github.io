@@ -65,14 +65,12 @@
 <h4 id="分析原因"><a href="#分析原因" class="headerlink" title="分析原因"></a>分析原因</h4><p>异步获取数据导致用<strong>antv/g6</strong>渲染 canvas 在获取数据之前就被执行了<br>所以就让异步执行完周再渲染 canvas 就好了</p>
 <h4 id="排查问题"><a href="#排查问题" class="headerlink" title="排查问题"></a>排查问题</h4><p>虽说我有 90%的信心认定是异步的原因，但是俗话说的好，实践是检验真理的唯一标准<br>还是动手打个<strong>bugger</strong>检查下<br>具体如何如何排查我就不一一表述了<br>最终确定问题就是异步的问题</p>
 <h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><p>其实在我灵光乍现的瞬间，脑中就出现了好几个方法，直到排查出问题<br>爱卿，计将安出？</p>
-<blockquote>
 <ol>
 <li>使用延迟函数<strong>setTimout</strong>,但是有点<strong>low</strong>啊</li>
 <li>使用 Promise.all 方法，备选 1</li>
 <li>使用 promise 的升级版 async/await,备选 2</li>
 <li>使用 generator 方法，备选 3<br>由于使用的是 vue+axios，不考虑 jquery,目前想到的就是以上几种</li>
 </ol>
-</blockquote>
 <h4 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h4><h5 id="使用方案一"><a href="#使用方案一" class="headerlink" title="使用方案一"></a>使用方案一</h5><p>下班了，未完待续…</p>
 
       </div>
