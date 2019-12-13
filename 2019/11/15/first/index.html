@@ -59,19 +59,48 @@
   <div class="lx-post">
     <div class="lx-entry padding">
       <div>
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>2019 年 11 月 14 日有个同事在写股权穿透图，其实就是思维导图，突然被一个问题给难住了<br>我嘞个去，我这个牛人同事居然被难住了，这太稀有了，这可是大神级人物啊<br>估计是因为之前生病身体一直没有痊愈，坚持带病上班，脑子被疼痛折磨的有些卡顿<br>没关系，这是个我挺身而出，发扬优易精神与友谊精神的好时机，虽然我可能会被打脸，(●ˇ∀ˇ●)<br>男子汉大丈夫，要行事果断，我二话不说，撸起袖子，喊着响亮的优易口号就去了解情况了</p>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>2019 年 11 月 14 日有个同事在写股权穿透图，其实就是思维导图，突然被一个问题给难住了<br>我嘞个去，我这个牛人同事居然被难住了，这太稀有了，这可是大神级人物啊<br>估计是因为之前生病身体一直没有痊愈，坚持带病上班，脑子被疼痛折磨的有些卡顿<br>没关系，这是个我挺身而出，发扬优易精神与友谊精神的好时机，虽然我可能会被打脸，(●ˇ∀ˇ●)<br>男子汉大丈夫，要行事果断，我二话不说，撸起袖子，喊着响亮的优易口号就去了解情况了<br>o(^▽^)o</p>
 <hr>
 <h3 id="进入正题"><a href="#进入正题" class="headerlink" title="进入正题"></a>进入正题</h3><p>当牛人同事说出问题的那一霎那，一道灵光在我脑中迸现，这是神助我啊</p>
 <h4 id="分析原因"><a href="#分析原因" class="headerlink" title="分析原因"></a>分析原因</h4><p>异步获取数据导致用<strong>antv/g6</strong>渲染 canvas 在获取数据之前就被执行了<br>所以就让异步执行完周再渲染 canvas 就好了</p>
 <h4 id="排查问题"><a href="#排查问题" class="headerlink" title="排查问题"></a>排查问题</h4><p>虽说我有 90%的信心认定是异步的原因，但是俗话说的好，实践是检验真理的唯一标准<br>还是动手打个<strong>bugger</strong>检查下<br>具体如何如何排查我就不一一表述了<br>最终确定问题就是异步的问题</p>
 <h4 id="解决方案"><a href="#解决方案" class="headerlink" title="解决方案"></a>解决方案</h4><p>其实在我灵光乍现的瞬间，脑中就出现了好几个方法，直到排查出问题<br>爱卿，计将安出？</p>
 <ol>
-<li>使用延迟函数<strong>setTimout</strong>,但是有点<strong>low</strong>啊</li>
-<li>使用 Promise.all 方法，备选 1</li>
-<li>使用 promise 的升级版 async/await,备选 2</li>
-<li>使用 generator 方法，备选 3<br>由于使用的是 vue+axios，不考虑 jquery,目前想到的就是以上几种</li>
+<li>使用延迟函数<strong>setTimeout</strong>,感觉限制比较多</li>
+<li>使用 <strong>Promise.all</strong> 方法，备选 1</li>
+<li>使用 <strong>promise</strong> 的升级版 <strong>async/await</strong>,备选 2</li>
+<li>使用 <strong>generator</strong> 方法，备选 3<br>由于使用的是 vue+axios，不考虑 jquery,目前想到的就是以上几种</li>
 </ol>
-<h4 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h4><h5 id="使用方案一"><a href="#使用方案一" class="headerlink" title="使用方案一"></a>使用方案一</h5><p>下班了，未完待续…</p>
+<h4 id="解决过程"><a href="#解决过程" class="headerlink" title="解决过程"></a>解决过程</h4><h5 id="使用方案一"><a href="#使用方案一" class="headerlink" title="使用方案一"></a>使用方案一</h5><p>如果使用<strong>setTimeou</strong>方法的话，首先不知道以后上线后用户的网络环境如何，所以时间设定上不太好掌控，故舍弃</p>
+<h5 id="使用方案二"><a href="#使用方案二" class="headerlink" title="使用方案二"></a>使用方案二</h5><p>使用<strong>Promise.all</strong>方法</p>
+<p>这里出现个小插曲，我在使用 promise.all 的时候，突然记不清参数的类型了，而当时又死要面子坚决不查百度，就直接把异步函数当作独立的参数传进去，结果就是报错还找不到原因，后来自己私下里查了下，应该传数组,代码如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Promise.all([getData1(),getData2()]).then((res)=&gt;&#123;</span><br><span class="line">  this.data1 = res[0]</span><br><span class="line">  this.data2 = res[1]</span><br><span class="line">&#125;).catch(console.error)</span><br></pre></td></tr></table></figure>
+
+<p>但是,这里要注意了<br><strong>promise.all</strong>传递的是数组，当其中所有<strong>promise</strong>都完成<strong>resolve</strong>,回调所有成功的结果，如果有一个失败，回调第一个失败结果<br>这就意味着：</p>
+<ol>
+<li>如果有一个回调执行失败，<strong>then</strong>是不会执行的，或者说，所有的<strong>promise</strong>也都失败了</li>
+<li>即使有几个<strong>promise</strong>已经进入<strong>resolved</strong>状态，也会阻塞在那里直到所有的<strong>promise</strong>完成<br>第一点会使得项目的容错大大降低，也许可能只是一个不关键的数据加载失败，其他所有的数据也不会显示。<br>第二点有违 JavaScript 非阻塞的理念，如果一个回调迟迟不能拿到结果，大家就都干等着了<br><strong>所以 promise 要谨慎使用，不过个人认为在以下情况可以考虑</strong></li>
+<li>几个异步操作是强相关的，后续步骤必须依赖这几个步骤全部成功才能进行。</li>
+<li>比如假设一个支付操作需要用户账户有余额，并且商品有库存，才能进行下一步操作，那么我们也许需要 Promise.all 来处理。</li>
+</ol>
+<h5 id="使用方案三"><a href="#使用方案三" class="headerlink" title="使用方案三"></a>使用方案三</h5><p><strong>async/await 方法</strong></p>
+<p>由于方案二传参错误，本人立马放弃方案二，立即转而使用方案三<br>但是，好事多磨，又出现了问题<br>本人想当然感觉可以把 mounted 加上 async 变为同步的，结果又被打脸，之后查到，<strong>vue 的钩子函数都是在指定时间或时机执行</strong>，添加 async 毫无卵用<br>那就把 async 同步方法放到 methods 中，在 mounted 中调用不就行了，哈哈哈，闲话少说，上代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">mounted()&#123;</span><br><span class="line">  getData()</span><br><span class="line">&#125;,</span><br><span class="line">methods:&#123;</span><br><span class="line">  async getData()&#123;</span><br><span class="line">    this.data1 = await getData1()</span><br><span class="line">    this.data2 = await getData2()</span><br><span class="line">    this.init()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h5 id="方案四"><a href="#方案四" class="headerlink" title="方案四"></a>方案四</h5><p>因为之前的方案已经有效了，所以这个方法就是私下里做的拓展了</p>
+<p><strong>generator 方法</strong></p>
+<p>Genrator 函数比起 Async 函数就像是 Async 函数是 Genrator 的语法糖</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">function* gen()&#123;</span><br><span class="line">  try &#123;</span><br><span class="line">    let a = yield new Promise();</span><br><span class="line">    let b = yield new Promise();</span><br><span class="line">    let c = yield new Promise();</span><br><span class="line">  &#125; catch (e) &#123;</span><br><span class="line">    console.log(&apos;e&apos;);</span><br><span class="line">  &#125;</span><br><span class="line">  yield console.log(&apos;c&apos;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">let g = gen();</span><br></pre></td></tr></table></figure>
+
+<p>执行 Generator 函数不会像 Async 函数那样自动执行全部异步操作，而是返回一个执行器，这个执行器有 next/throw/return 三个方法可以让 Generator 函数里动起来。如果我们想要向 Async 函数那样不用自己 next next next 无止境地调用，那么我们需要一个自动执行的方法。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">function go(gen) &#123;</span><br><span class="line">  var g = gen();</span><br><span class="line"></span><br><span class="line">  next(g.next());</span><br><span class="line"></span><br><span class="line">  function next(res) &#123;</span><br><span class="line">    if (res.done) return value;</span><br><span class="line">    res.value.then((data) =&gt; &#123;</span><br><span class="line">      next(g.next(data));</span><br><span class="line">    &#125;).catch((err) =&gt; &#123;</span><br><span class="line">      console.error(err);</span><br><span class="line">      next(g.throw(err));</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>但是，这里有个转折<br>小程序不支持 Generator 函数，并且同时间最多支持 5 个请求，所以使用 Promise 来做异步批量调用是个好选择</p>
+<h4 id="契合主题"><a href="#契合主题" class="headerlink" title="契合主题"></a>契合主题</h4><p>突然发现自己好像有点跑偏了，赶紧跑回来<br>主题是 async/await 的优雅写法<br>所以二话不说上代码、举栗子</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">var urlArr = [url1, url2, url3];</span><br><span class="line"></span><br><span class="line">function makeRequest(url)&#123;</span><br><span class="line">    return new Promise((resolve,reject)=&gt;&#123;</span><br><span class="line">        $.get(url).success((ret)=&gt;&#123;</span><br><span class="line">            resolve(ret)</span><br><span class="line">        &#125;).fail(()=&gt;&#123;</span><br><span class="line">            reject()</span><br><span class="line">        &#125;)</span><br><span class="line">    &#125;)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">async function makaPromiseList(dataArr,handler)&#123;</span><br><span class="line">    var result = [];</span><br><span class="line">    for(let item of dataArr)&#123;</span><br><span class="line">        var ret = await handler(item);</span><br><span class="line">        result.push(ret);</span><br><span class="line">    &#125;</span><br><span class="line">    return result;</span><br><span class="line">&#125;</span><br><span class="line">makaPromiseList(urlArr,makeRequest).then((ret)=&gt;&#123;</span><br><span class="line">    console.log(ret)</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+
+<p>看了之后发现这个写法很是巧妙，将异步处理函数 promise 以遍历的形式调用执行，并将这个方法以参数的形式传入到另一个方法中，感觉很有意思</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以目前的 es6、es7 大行其道的行情来看解决异步回调的方案中<br>async/await 使用性比较广泛，generator 次之<br>而随着 jquery 的使用越来越少，deffered 渐渐不被使用，甚至部分前端不太知道 deffered 是啥<br>但是，前端的路道阻且长，在学习新知识、拓宽知识面的同时，一些经典老技术也要知道点，毕竟可以吹牛逼啊，哈哈哈</p>
 
       </div>
     </div>
@@ -80,12 +109,12 @@
 <div class="lx-navigation">
 	<div class="lx-cover prev lx-cover-sm" style="background-image: url(/images/footer_1.jpg)">
 		<div class="overlay"></div>
-		<a class="copy" href="#">
+		<a class="copy" href="/2019/12/13/A_pit/">
 			<div class="display-t">
 				<div class="display-tc">
 					<div>
 						<span>Next</span>
-						<h3>没有更新的文章</h3>
+						<h3>大坑</h3>
 					</div>
 				</div>
 			</div>

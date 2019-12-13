@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>大坑 | 我的博客是最那啥的</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="author" content="谢先生">
+  <meta name="keywords" content="">
+  <meta name="description" content="其实就是一些前端技术笔记">
+  <script id="hexo-configurations">
+  var CONFIG = {
+    root: '/',
+    theme: 'lx',
+    version: '0.0.0',
+    localsearch:{
+      "enable": false,
+      "trigger": "auto",
+      "top_n_per_article": 1,
+      "unescape": false,
+      "preload": false
+      },
+    path: '-'
+  };
+</script>
+
+  <link rel="shortcut icon" href="/favicon.ico">
+  <link rel="stylesheet" href="/css/main.css">
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/jquery.jside.menu.js"></script>
+	<script>
+	$(document).ready(function(){
+	$(".menu-container").jSideMenu({
+	    jSidePosition: "position-right",
+	    jSideSticky: true,
+	    jSideSkin: "endless-river",
+	     });
+	}); 
+	</script>
+  
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:300|Noto+Serif+SC&amp;display=swap">
+  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/font-awesome@4/css/font-awesome.min.css">
+</head>
+<body>
+<div class="single">
+<div id="page">
+<div id="lx-aside" style="background-image: url(/images/page-cover.jpg)" data-stellar-background-ratio="0.5">
+  <div class="overlay">
+  <div class="page-title">
+    <div class="avatar"><a href="/"><img src="/images/person_1.jpg"></a></div>
+    <span>2019-12-13</span>
+    <h2>大坑</h2>
+    <div class="tags"><i class="fa fa-tag"></i><a class="tag-link" href="/tags/iview%E7%9A%84Form%E8%A1%A8%E5%8D%95%EF%BC%8Ciview%E7%9A%84checkbox/" rel="tag">iview的Form表单，iview的checkbox</a></div>
+    </div>
+</div>
+</div>
+
+<div id="lx-main-content">
+  <div class="lx-post">
+    <div class="lx-entry padding">
+      <div>
+        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><strong>前些日子做的一个项目，用的是 vue+iview,中间自己给自己挖了个坑，在此写下来给自己提个醒，以免以后再犯</strong>  </p>
+<hr>
+<h3 id="事情是怎么滴发生的"><a href="#事情是怎么滴发生的" class="headerlink" title="事情是怎么滴发生的"></a>事情是怎么滴发生的</h3><ol>
+<li><p>我挖的坑</p>
+<ul>
+<li><p>在做 Form 表单验证的时候，Form 上的属性有个校验映射对象叫 rules,需要用 v-on 来进行绑定，但是我给写错了，少写了 s，然后校验就一直不执行，我就一顿打断点，换写法，浏览器就是不给面子，一直报错，浪费了半个下午，最后还找人帮忙看 bug,才发现原来是 ji 少写了个 s,自己把自己给坑了！</p>
+</li>
+<li><p>上述问题完成后，还是校验不触发，赶紧再检查看看，这一看又发现自己真是坑货，校验属性名放到内容里了，没有放在其外部的 FormItem 上，能被触发才怪了，真是粗心啊！</p>
+</li>
+</ul>
+</li>
+<li><p>iview的坑</p>
+<ul>
+<li><p>在 Form 表单中使用了 checkbox 多选框，这个组件还可以以组为单位进行分布，需要在其外包个 checkboxgroup 标签，可以在 checkboxgroup 上绑定监听 change 的方法，看官方文档中需要在 checkbox 中添加 value 属性，而官网例子上可以把 value 属性放到 checkboxgroup 中，也可以用 v-model 替换 value 进行双向绑定，<strong>但是</strong>，如果用:value 的话，监听属性得用计算属性 computed，而且而且这个计算属性默认是有 get 方法，得给其添加 set 方法，我用:value 时，监听 change 方法总是输出当前点击的 checkbox 的 label 值，百度了半天也不知道怎么解决，百度无果的情况下就自己换写法试。最后使用了 v-model 并把其绑定的数据改为数组的形式才得以解决，故得出结论，iview 也是坑，<strong>iview 中的 checkboxgroup 上监听 checkbox 点选的改变，在其上设置 value 属性的话是单向绑定，有很大局限性，使用 v-model 绑定数据的话是双向绑定，但是最好是数组格式的简单数据，不然在 on-change 中会返回乱七八糟的数据</strong></p>
+</li>
+<li><p>在 iview 的 input 组件中校验数字则会出现问题，比如我在 input 上没有加 type=”number”只是在校验规则上加了，则会校验不通过，若根据 api 在上边添加 number 或者:nember=”true”,依然会报错说你没有往里边写东西，如此该怎么办？那就自己动手丰衣足食，咱自定义校验规则：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">// 校验规则设定</span><br><span class="line">&#123;</span><br><span class="line">  type: &quot;number&quot;,</span><br><span class="line">  validator: this.validateNum,</span><br><span class="line">  message: &quot;输入内容只能为正整数！&quot;,</span><br><span class="line">  trigger: &quot;submit&quot;</span><br><span class="line">&#125;</span><br><span class="line">// 校验规则方法</span><br><span class="line">validateNum(rule, value, callback) &#123;</span><br><span class="line">  if (/^[0-9]+$/.test(value)) &#123;</span><br><span class="line">    callback();</span><br><span class="line">  &#125; else &#123;</span><br><span class="line">    return callback(new Error(&quot;请填写整数&quot;));</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></li>
+<li><p>同时本人还实验出来一个问题，就是校验规则的属性名要和被校验项的绑定值属性名一样，否则会出问题，这一点跟elementUI一样  </p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>通过这些事情发现，写代码要自己细心，不然一定会给自带来麻烦，找bug耽误时间不说还会影响工作进度，另外就是UI框架都有或大或小缺陷，出现问题先到网上查一查，实在没有办法曲线救国，换个方式试一试！</p>
+</li>
+</ul>
+</li>
+</ol>
+
+      </div>
+    </div>
+  </div>
+</div>
+<div class="lx-navigation">
+	<div class="lx-cover prev lx-cover-sm" style="background-image: url(/images/footer_1.jpg)">
+		<div class="overlay"></div>
+		<a class="copy" href="#">
+			<div class="display-t">
+				<div class="display-tc">
+					<div>
+						<span>Next</span>
+						<h3>没有更新的文章</h3>
+					</div>
+				</div>
+			</div>
+		</a>
+	</div>
+        <div class="lx-cover next lx-cover-sm" style="background-image: url(/images/footer_2.jpg)">
+		<div class="overlay"></div>
+		<a class="copy" href="/2019/11/15/first/">
+			<div class="display-t">
+				<div class="display-tc">
+					<div>
+						<span>Prev</span>
+						<h3>async/a...</h3>
+					</div>
+				</div>
+			</div>
+		</a>
+	</div>
+</div>
+
+</div>
+
+<footer>
+  <div>
+  Copyright &copy; 2019.<a href="/">我的博客是最那啥的</a><br>Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme <a href="https://lx.blleng.cn" target="_blank">Lx</a><br>
+  </div>
+</footer>
+</div>
+
+<button class="menu-trigger"></button>
+<div class="menu">
+  <div class="menu-head">
+    <span class="layer">
+      <div class="col">
+        <div class="row for-pic">
+          <div class="profile-pic">
+            <a href="/"><img src="/images/person_1.jpg" alt="谢先生"/></a>
+          </div>
+        </div>
+        <div class="row for-name">
+          <p>谢先生</p>
+          <span class="tagline">Hello, World!</span>
+        </div>
+      </div>
+    </span>
+  </div>
+  <nav class="menu-container">
+  <ul class="menu-items">
+    <li><a href="/"><i class="fa fa-home fa-fw"></i>首页</a></li>
+    <li><a href="/archives/"><i class="fa fa-archive fa-fw"></i>归档</a></li>
+    <li class="has-sub"><span class="dropdown-heading">
+      <i class="fa fa-bookmark fa-fw"></i>页面</span>
+        <ul>
+          <li><a href="/guestbook">留言</a></li>
+        <li><a href="/about">关于</a></li>
+        </ul>
+    </li>
+    <li class="has-sub"><span class="dropdown-heading">
+      <i class="fa fa-link fa-fw"></i>友链</span>
+        <ul>
+          <li> <a href="https://lx.blleng.cn" target="_blank">Theme-Lx</a></li>
+        </ul>
+    </li>
+  </ul>
+  </nav>
+</div>
+
+<div class="gototop js-top">
+  <a href="#" class="js-gotop"><i class="fa fa-arrow-up"></i></a>
+</div>
+<script src="/js/jquery.easing.min.js"></script>
+<script src="/js/jquery.waypoints.min.js"></script>
+<script src="/js/jquery.stellar.min.js"></script>
+<script src="/js/main.js"></script>
+
+
+</body>
+</html>
